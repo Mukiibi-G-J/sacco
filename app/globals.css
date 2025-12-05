@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* CSS Variables for dynamic values */
+  --color-dark-teal: #005151;
+  --color-accent-yellow: #ffbf3f;
+  --color-secondary-yellow: #e8a115;
+  --color-primary-accent: #1a938a;
+  
+  --color-main-text: #060b1e;
+  --color-body-text: #3b4a46;
+  
+  --color-soft-bg: #f7f7f7;
+  --color-soft-teal-bg: #eafaf8;
+  
+  --color-stroke: #e5e5e5;
+  --color-light-stroke: #e4e4e4;
+}
+
+@layer base {
+  * {
+    @apply border-stroke;
+  }
+  
+  html {
+    font-family: 'Outfit', sans-serif;
+  }
+  
+  body {
+    @apply bg-soft-bg text-body-text font-sans antialiased;
+    font-family: 'Outfit', sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6,
+  p, span, div, a, button, input, textarea, select, label {
+    font-family: inherit;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
