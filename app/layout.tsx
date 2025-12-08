@@ -1,5 +1,17 @@
 import type { Metadata } from "next";
+import { Outfit } from "next/font/google";
 import "./globals.css";
+import "../styles/animate.min.css";
+import "../styles/odometer.css";
+import "../styles/style.css";
+import "../styles/swiper.min.css";
+
+const outfit = Outfit({
+  weight: ["300", "400", "500", "600", "700", "800"],
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "SACCO Management System",
@@ -12,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="font-sans">
-      <body className="font-sans">{children}</body>
+    <html lang="en" className={`${outfit.variable} font-sans`}>
+      <body className="font-outfit antialiased">{children}</body>
     </html>
   );
 }

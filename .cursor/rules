@@ -1,0 +1,68 @@
+# Project Rules and Configuration Documentation
+
+## Font Configuration
+
+### Outfit Font Setup (Next.js Font Optimization)
+
+The project uses the **Outfit** font family loaded via Next.js font optimization (`next/font/google`) for optimal performance.
+
+#### Implementation Details:
+
+1. **Font Loading (app/layout.tsx)**
+   - Font is imported from `next/font/google`
+   - Configured with weights: 300, 400, 500, 600, 700, 800
+   - CSS variable: `--font-outfit`
+   - Display: `swap` (prevents invisible text during font load)
+   - Font variable is applied to the `<html>` element
+   - Body element uses `font-outfit` and `antialiased` classes
+
+2. **Tailwind Configuration (tailwind.config.ts)**
+   - `outfit` font family: `['var(--font-outfit)', 'sans-serif']`
+   - `sans` (default): `['var(--font-outfit)', 'sans-serif']`
+   - Both font families reference the CSS variable for consistency
+
+3. **Global CSS (app/globals.css)**
+   - Theme variable: `@theme inline { --font-sans: var(--font-outfit); }`
+   - HTML and body elements use `var(--font-outfit)` for font-family
+   - All text elements inherit the font family
+   - Google Fonts `@import` has been removed (replaced by Next.js font optimization)
+
+#### Usage:
+- Use `font-outfit` class for explicit Outfit font
+- Use `font-sans` class for default sans-serif (which is Outfit)
+- Font weights available: 300, 400, 500, 600, 700, 800
+
+## Style Imports
+
+### External Style Files
+
+The following style files from the `styles/` folder are imported in `app/layout.tsx`:
+
+1. **animate.min.css** - Animation library styles (Animate.css)
+2. **odometer.css** - Odometer/counter component styles
+3. **style.css** - Main compiled style file
+4. **swiper.min.css** - Swiper slider library styles
+
+#### Import Order:
+1. `globals.css` (Tailwind and custom styles)
+2. `animate.min.css`
+3. `odometer.css`
+4. `style.css`
+5. `swiper.min.css`
+
+This order ensures proper CSS cascade and allows custom styles to override library styles when needed.
+
+## Styling Conventions
+
+- **Framework**: Tailwind CSS for styling (preferred over Reactstrap)
+- **Naming**: camelCase for all field names and CSS variables
+- **Font**: Outfit is the default sans-serif font throughout the application
+- **Font Loading**: Use Next.js font optimization for all Google Fonts
+
+## Important Notes
+
+- Do NOT use Google Fonts `@import` in CSS files when using `next/font/google`
+- Always use the CSS variable `--font-outfit` when referencing the font in CSS
+- Use Tailwind classes (`font-outfit`, `font-sans`) in components when possible
+- The font is automatically optimized and self-hosted by Next.js
+

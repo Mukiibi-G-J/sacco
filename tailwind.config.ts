@@ -8,7 +8,8 @@ const config: Config = {
   ],
   theme: {
     fontFamily: {
-      sans: ['Outfit', 'sans-serif'],
+      outfit: ['var(--font-outfit)', 'sans-serif'],
+      sans: ['var(--font-outfit)', 'sans-serif'], // Default sans font
     },
     extend: {
       colors: {

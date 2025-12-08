@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
-
 :root {
   /* CSS Variables for dynamic values */
   --color-dark-teal: #005151;
@@ -21,18 +19,22 @@
   --color-light-stroke: #e4e4e4;
 }
 
+@theme inline {
+  --font-sans: var(--font-outfit);
+}
+
 @layer base {
   * {
     @apply border-stroke;
   }
   
   html {
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-outfit), sans-serif;
   }
   
   body {
     @apply bg-soft-bg text-body-text font-sans antialiased;
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-outfit), sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6,
