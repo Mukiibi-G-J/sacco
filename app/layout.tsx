@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
+import { ToastProvider } from "@/components/ui/toast";
 import "./globals.css";
 import "../styles/animate.min.css";
 import "../styles/odometer.css";
@@ -25,7 +26,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${outfit.variable} font-sans`}>
-      <body className="font-outfit antialiased">{children}</body>
+      <body className="font-outfit antialiased">
+        <ToastProvider>{children}</ToastProvider>
+      </body>
     </html>
   );
 }

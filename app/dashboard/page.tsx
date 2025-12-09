@@ -1,18 +1,25 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { DashboardLayout, SidebarItem } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Breadcrumb, BreadcrumbItem } from "@/components/ui/breadcrumb";
+import { RegisterMemberModal } from "@/components/modals/register-member-modal";
+import { RecordContributionModal } from "@/components/modals/record-contribution-modal";
+import { mockStore } from "@/lib/mock-data";
 import {
   Users,
   DollarSign,
   FileText,
-  Clock,
+  TrendingUp,
   Plus,
   ArrowRight,
   Home,
-  Calculator,
+  Wallet,
+  CreditCard,
+  Receipt,
   BarChart3,
   Settings,
 } from "lucide-react";
@@ -24,19 +31,24 @@ const sidebarItems: SidebarItem[] = [
     icon: <Home className="h-5 w-5" />,
   },
   {
-    label: "Employees",
-    href: "/dashboard/employees",
+    label: "Members",
+    href: "/dashboard/members",
     icon: <Users className="h-5 w-5" />,
   },
   {
-    label: "Payroll",
-    href: "/dashboard/payroll",
-    icon: <Calculator className="h-5 w-5" />,
+    label: "Savings",
+    href: "/dashboard/savings",
+    icon: <Wallet className="h-5 w-5" />,
   },
   {
-    label: "Time Tracking",
-    href: "/dashboard/time-tracking",
-    icon: <Clock className="h-5 w-5" />,
+    label: "Loans",
+    href: "/dashboard/loans",
+    icon: <CreditCard className="h-5 w-5" />,
+  },
+  {
+    label: "Transactions",
+    href: "/dashboard/transactions",
+    icon: <Receipt className="h-5 w-5" />,
   },
   {
     label: "Reports",
@@ -57,53 +69,176 @@ const breadcrumbItems: BreadcrumbItem[] = [
 
 const stats = [
   {
-    title: "Total Employees",
-    value: "9",
+    title: "Total Members",
+    value: "1,247",
     change: "+5.2%",
     changeType: "positive" as const,
     comparison: "vs last month",
     icon: <Users className="h-6 w-6" />,
   },
   {
-    title: "This Month Payroll",
-    value: "$45,230",
+    title: "Total Savings",
+    value: "KES 12.5M",
     change: "+12.5%",
     changeType: "positive" as const,
     comparison: "vs last month",
-    icon: <DollarSign className="h-6 w-6" />,
+    icon: <Wallet className="h-6 w-6" />,
   },
   {
-    title: "Pending Approvals",
-    value: "1",
-    change: "-2",
-    changeType: "negative" as const,
-    comparison: "vs last month",
-    icon: <FileText className="h-6 w-6" />,
-  },
-  {
-    title: "Time Entries",
-    value: "1,234",
+    title: "Active Loans",
+    value: "342",
     change: "+8.1%",
     changeType: "positive" as const,
     comparison: "vs last month",
-    icon: <Clock className="h-6 w-6" />,
+    icon: <CreditCard className="h-6 w-6" />,
+  },
+  {
+    title: "Total Revenue",
+    value: "KES 2.3M",
+    change: "+15.3%",
+    changeType: "positive" as const,
+    comparison: "vs last month",
+    icon: <TrendingUp className="h-6 w-6" />,
   },
 ];
 
 const activities = [
   {
-    icon: <DollarSign className="h-5 w-5" />,
-    message: "Payroll processed for 127 employees",
+    icon: <Users className="h-5 w-5" />,
+    message: "New member registered: John Doe",
     timestamp: "2 hours ago",
+  },
+  {
+    icon: <Wallet className="h-5 w-5" />,
+    message: "Monthly contributions processed for 1,200 members",
+    timestamp: "5 hours ago",
+  },
+  {
+    icon: <CreditCard className="h-5 w-5" />,
+    message: "Loan application approved: KES 50,000",
+    timestamp: "1 day ago",
+  },
+  {
+    icon: <Receipt className="h-5 w-5" />,
+    message: "Loan repayment received: KES 25,000",
+    timestamp: "1 day ago",
   },
 ];
 
-const quickActions = [
-  { label: "Add Employee", icon: <Users className="h-4 w-4" /> },
-  { label: "Process Payroll", icon: <Calculator className="h-4 w-4" /> },
-];
-
 export default function DashboardPage() {
+  const router = useRouter();
+  const [stats, setStats] = useState([
+    {
+      title: "Total Members",
+      value: "0",
+      change: "+0%",
+      changeType: "positive" as const,
+      comparison: "vs last month",
+      icon: <Users className="h-6 w-6" />,
+    },
+    {
+      title: "Total Savings",
+      value: "KES 0",
+      change: "+0%",
+      changeType: "positive" as const,
+      comparison: "vs last month",
+      icon: <Wallet className="h-6 w-6" />,
+    },
+    {
+      title: "Active Loans",
+      value: "0",
+      change: "+0%",
+      changeType: "positive" as const,
+      comparison: "vs last month",
+      icon: <CreditCard className="h-6 w-6" />,
+    },
+    {
+      title: "Total Revenue",
+      value: "KES 0",
+      change: "+0%",
+      changeType: "positive" as const,
+      comparison: "vs last month",
+      icon: <TrendingUp className="h-6 w-6" />,
+    },
+  ]);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [isContributionModalOpen, setIsContributionModalOpen] = useState(false);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = () => {
+    const members = mockStore.getMembers();
+    const savingsAccounts = mockStore.getSavingsAccounts();
+    const loans = mockStore.getLoans();
+    const activeLoans = loans.filter((l) => l.status === "active");
+    
+    const totalSavings = savingsAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+    const totalLoanAmount = loans.reduce((sum, loan) => sum + loan.principalAmount, 0);
+    
+    setStats([
+      {
+        title: "Total Members",
+        value: members.length.toLocaleString(),
+        change: "+5.2%",
+        changeType: "positive" as const,
+        comparison: "vs last month",
+        icon: <Users className="h-6 w-6" />,
+      },
+      {
+        title: "Total Savings",
+        value: `KES ${(totalSavings / 1000000).toFixed(1)}M`,
+        change: "+12.5%",
+        changeType: "positive" as const,
+        comparison: "vs last month",
+        icon: <Wallet className="h-6 w-6" />,
+      },
+      {
+        title: "Active Loans",
+        value: activeLoans.length.toString(),
+        change: "+8.1%",
+        changeType: "positive" as const,
+        comparison: "vs last month",
+        icon: <CreditCard className="h-6 w-6" />,
+      },
+      {
+        title: "Total Revenue",
+        value: `KES ${(totalLoanAmount / 1000000).toFixed(1)}M`,
+        change: "+15.3%",
+        changeType: "positive" as const,
+        comparison: "vs last month",
+        icon: <TrendingUp className="h-6 w-6" />,
+      },
+    ]);
+  };
+
+  const quickActions = [
+    {
+      label: "Register Member",
+      icon: <Users className="h-4 w-4" />,
+      onClick: () => setIsRegisterModalOpen(true),
+    },
+    {
+      label: "Record Contribution",
+      icon: <Wallet className="h-4 w-4" />,
+      onClick: () => setIsContributionModalOpen(true),
+    },
+    {
+      label: "Process Loan",
+      icon: <CreditCard className="h-4 w-4" />,
+      onClick: () => router.push("/dashboard/loans"),
+    },
+  ];
+
+  const handleRegisterSuccess = () => {
+    loadDashboardData();
+  };
+
+  const handleContributionSuccess = () => {
+    loadDashboardData();
+  };
+
   return (
     <DashboardLayout
       sidebarItems={sidebarItems}
@@ -122,7 +257,7 @@ export default function DashboardPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-main-text mb-2">Dashboard</h1>
         <p className="text-base text-body-text">
-          Welcome back! Here's what's happening with your payroll.
+          Welcome back! Here's an overview of your SACCO operations.
         </p>
       </div>
 
@@ -172,7 +307,11 @@ export default function DashboardPage() {
               <CardTitle className="text-lg font-semibold text-main-text">
                 Recent Activity
               </CardTitle>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push("/dashboard/transactions")}
+              >
                 View All
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
@@ -216,6 +355,7 @@ export default function DashboardPage() {
                   key={index}
                   variant="outline"
                   className="w-full justify-start"
+                  onClick={action.onClick}
                 >
                   <span className="mr-2">{action.icon}</span>
                   {action.label}
@@ -225,6 +365,18 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <RegisterMemberModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+        onSuccess={handleRegisterSuccess}
+      />
+
+      <RecordContributionModal
+        isOpen={isContributionModalOpen}
+        onClose={() => setIsContributionModalOpen(false)}
+        onSuccess={handleContributionSuccess}
+      />
     </DashboardLayout>
   );
 }

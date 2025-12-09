@@ -8,6 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { ErrorMessage } from "@/components/ui/error-message";
+import { useToast } from "@/components/ui/toast";
+import { mockStore } from "@/lib/mock-data";
+import { useRouter } from "next/navigation";
 
 interface Role {
   value: string;
@@ -21,49 +24,59 @@ interface Role {
 
 const roles: Role[] = [
   {
-    value: "hr-manager",
-    label: "HR Manager",
-    description: "Manage employees and HR operations",
+    value: "admin",
+    label: "Administrator",
+    description: "Full system access and configuration",
     icon: <User className="h-6 w-6" />,
     color: "blue",
     bgColor: "bg-blue-50",
     iconColor: "text-blue-600",
   },
   {
-    value: "payroll-admin",
-    label: "Payroll Administrator",
-    description: "Handle payroll processing and reports",
+    value: "manager",
+    label: "Manager",
+    description: "Loan approvals, reports, and member management",
     icon: <User className="h-6 w-6" />,
     color: "green",
     bgColor: "bg-green-50",
     iconColor: "text-green-600",
   },
   {
-    value: "business-owner",
-    label: "Business Owner",
-    description: "Full system access and oversight",
+    value: "accountant",
+    label: "Accountant",
+    description: "Savings, loans, transactions, and financial reports",
     icon: <User className="h-6 w-6" />,
     color: "purple",
     bgColor: "bg-purple-50",
     iconColor: "text-purple-600",
   },
   {
-    value: "employee",
-    label: "Employee",
-    description: "View personal information and requests",
+    value: "loan-officer",
+    label: "Loan Officer",
+    description: "Loan applications, member verification, and collections",
     icon: <User className="h-6 w-6" />,
     color: "orange",
     bgColor: "bg-orange-50",
     iconColor: "text-orange-600",
   },
+  {
+    value: "member",
+    label: "Member",
+    description: "View savings, apply for loans, and view statements",
+    icon: <User className="h-6 w-6" />,
+    color: "teal",
+    bgColor: "bg-soft-teal-bg",
+    iconColor: "text-dark-teal",
+  },
 ];
 
 const roleOptions = [
   { value: "", label: "All Roles" },
-  { value: "hr-manager", label: "HR Manager" },
-  { value: "payroll-admin", label: "Payroll Administrator" },
-  { value: "business-owner", label: "Business Owner" },
-  { value: "employee", label: "Employee" },
+  { value: "admin", label: "Administrator" },
+  { value: "manager", label: "Manager" },
+  { value: "accountant", label: "Accountant" },
+  { value: "loan-officer", label: "Loan Officer" },
+  { value: "member", label: "Member" },
 ];
 
 export default function LoginPage() {
@@ -73,19 +86,40 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { showToast } = useToast();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    // Check if user is already logged in
+    const currentUser = mockStore.getCurrentUser();
+    if (currentUser) {
+      router.push("/dashboard");
+    }
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    // Simulate API call
+    // Simulate API call delay
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      // TODO: Implement actual authentication
-      console.log("Login attempt:", { email, password, selectedRole });
+      
+      // Mock authentication
+      const user = mockStore.authenticateUser(email, password);
+      
+      if (user) {
+        showToast("Login successful!", "success");
+        // Redirect to dashboard
+        router.push("/dashboard");
+      } else {
+        setError("Invalid email or password. Please try again.");
+        showToast("Invalid credentials", "error");
+      }
     } catch (err) {
-      setError("Invalid email or password. Please try again.");
+      setError("An error occurred. Please try again.");
+      showToast("Login failed", "error");
     } finally {
       setLoading(false);
     }
@@ -93,6 +127,18 @@ export default function LoginPage() {
 
   const handleRoleSelect = (roleValue: string) => {
     setSelectedRole(roleValue);
+    // Auto-fill email based on role
+    const roleEmails: Record<string, string> = {
+      admin: "admin@sacco.com",
+      manager: "manager@sacco.com",
+      accountant: "accountant@sacco.com",
+      "loan-officer": "loanofficer@sacco.com",
+      member: "member@sacco.com",
+    };
+    if (roleEmails[roleValue]) {
+      setEmail(roleEmails[roleValue]);
+      setPassword("password123"); // Default password for demo
+    }
   };
 
   return (
@@ -251,11 +297,13 @@ export default function LoginPage() {
                   </code>
                 </div>
                 <ul className="text-xs text-blue-700 list-disc list-inside space-y-1">
-                  <li>HR Manager: hr@example.com</li>
-                  <li>Payroll Admin: payroll@example.com</li>
-                  <li>Business Owner: owner@example.com</li>
-                  <li>Employee: employee@example.com</li>
+                  <li>Admin: admin@sacco.com (any password)</li>
+                  <li>Manager: manager@sacco.com (any password)</li>
+                  <li>Accountant: accountant@sacco.com (any password)</li>
                 </ul>
+                <p className="text-xs text-blue-600 mt-2 font-semibold">
+                  Note: For demo, any password will work with these emails
+                </p>
               </CardContent>
             </Card>
           </div>
